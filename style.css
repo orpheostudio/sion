@@ -430,5 +430,5 @@ button {
 }
 
 #attach-button {
-    display: none;
+    flex-shrink: 0;
 }

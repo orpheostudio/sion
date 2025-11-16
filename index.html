@@ -20,7 +20,28 @@
     <main class="main-container">
         <div class="phone-frame">
             <div id="app-content" class="app-content">
-                <!-- Screens will be rendered here by JavaScript -->
+                <div class="screen chat-screen" id="chat-screen">
+                    <div id="chat-messages" class="chat-messages">
+                        <!-- Messages will be rendered here by JavaScript -->
+                    </div>
+                    <div class="chat-footer">
+                       <div class="chat-input-area">
+                            <div id="attachment-preview" class="attachment-preview" style="display: none;">
+                                <!-- Attachment preview rendered here by JS -->
+                            </div>
+                            <form id="chat-form" class="chat-form">
+                                <button type="button" id="attach-button" class="icon-button" aria-label="Anexar arquivo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.122 2.122l7.81-7.81" /></svg>
+                                </button>
+                                <input type="file" id="file-input" accept="image/*" class="hidden" />
+                                <textarea id="message-input" rows="1" placeholder="Message" class="message-input"></textarea>
+                                <button type="submit" id="send-button" class="send-button" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                                </button>
+                            </form>
+                       </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
