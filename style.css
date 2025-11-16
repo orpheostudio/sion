@@ -86,31 +86,29 @@ button {
     justify-content: flex-end;
 }
 
-.chat-intro-header {
+.chat-header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    padding: 2.5rem 1rem 1.5rem;
-    text-align: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f8fafc;
+    flex-shrink: 0;
 }
-
-.intro-avatar {
-    width: 160px;
-    height: auto;
-    margin-bottom: 1rem;
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
-
-.intro-title {
-    font-size: 2.5rem;
-    font-weight: 700;
+.header-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+}
+.header-title {
+    font-size: 1.125rem;
+    font-weight: 600;
     color: #1e293b;
-    margin: 0;
-}
-
-.intro-subtitle {
-    font-size: 1rem;
-    color: #64748b;
-    margin-top: 0.25rem;
 }
 
 .icon-button {
@@ -138,21 +136,30 @@ button {
     scroll-behavior: smooth;
 }
 
+@keyframes message-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .message-wrapper {
     display: flex;
     align-items: flex-end;
     gap: 0.5rem;
+    animation: message-in 0.3s ease-out;
 }
 .message-wrapper.user {
     justify-content: flex-end;
 }
-.avatar-chat {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 9999px;
-    flex-shrink: 0;
-    margin-bottom: 0.25rem;
+.message-wrapper.bot {
+    justify-content: flex-start;
 }
+
 .message-bubble {
     max-width: 80%;
     padding: 0.75rem 1rem;
@@ -297,8 +304,9 @@ button {
     padding: 0.5rem;
     border-radius: 9999px;
     transition: background-color 0.2s;
-    align-self: flex-start;
+    align-self: flex-end;
     flex-shrink: 0;
+    margin-bottom: 0.25rem;
 }
 .audio-button:hover {
     background-color: rgba(229, 231, 235, 0.8); /* hover:bg-gray-200/80 */

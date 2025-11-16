@@ -22,8 +22,8 @@ let dom = {}; // To be populated when a screen is rendered
 
 // --- STATE ---
 const initialMessages = [
-    { id: 1, sender: 'bot', text: 'Hi! How can I assist you today? 😊' },
-    { id: 2, sender: 'bot', text: 'Feel free to ask me anything!' }
+    { id: 1, sender: 'bot', text: 'Olá! Como posso te ajudar hoje? 😊' },
+    { id: 2, sender: 'bot', text: 'Sinta-se à vontade para me perguntar qualquer coisa!' }
 ];
 
 let state = {
@@ -144,27 +144,6 @@ function sanitize(str) {
     return temp.innerHTML;
 }
 
-window.handleCopyCode = function(button, code) {
-    const iconSpan = button.querySelector('.copy-icon');
-    const textSpan = button.querySelector('.copy-text');
-    
-    navigator.clipboard.writeText(code).then(() => {
-        if (iconSpan) iconSpan.innerHTML = ICONS.check;
-        if (textSpan) textSpan.textContent = 'Copiado!';
-        button.disabled = true;
-        setTimeout(() => {
-            if (iconSpan) iconSpan.innerHTML = ICONS.clipboard;
-            if (textSpan) textSpan.textContent = 'Copiar';
-            button.disabled = false;
-        }, 2000);
-    }).catch(() => {
-        if (textSpan) textSpan.textContent = 'Falhou!';
-        setTimeout(() => {
-            if (textSpan) textSpan.textContent = 'Copiar';
-        }, 2000);
-    });
-}
-
 function renderFormattedText(text) {
     const parts = text.split(/(```[\s\S]*?```)/g);
     return parts.map(part => {
@@ -174,14 +153,11 @@ function renderFormattedText(text) {
             const lang = langMatch ? langMatch[0].trim() : 'code';
             const codeContent = langMatch ? code.substring(lang.length + 1) : code;
             
-            // Escape backticks and backslashes for the inline onclick handler
-            const escapedCode = codeContent.replace(/\\/g, '\\\\').replace(/`/g, '\\`');
-            
             return `
                 <div class="code-block">
                     <div class="code-header">
                         <span>${sanitize(lang)}</span>
-                        <button class="copy-button" onclick="handleCopyCode(this, \`${escapedCode}\`)">
+                        <button class="copy-button" data-code="${sanitize(codeContent)}">
                             <span class="copy-icon">${ICONS.clipboard}</span>
                             <span class="copy-text">Copiar</span>
                         </button>
@@ -190,11 +166,8 @@ function renderFormattedText(text) {
                 </div>`;
         }
         let html = sanitize(part);
-        // Bold: **text** -> <strong>text</strong>
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        // Italic: *text* -> <em>text</em>
         html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        // New lines
         html = html.replace(/\n/g, '<br>');
         return html;
     }).join('');
@@ -206,50 +179,37 @@ function renderMessages() {
     if (!container) return;
 
     container.innerHTML = '';
-    let lastSender = null;
-
-    // Conditionally render the intro header
-    if (state.messages.length <= 2 && state.messages[0]?.id === 1) {
-        container.innerHTML += `
-            <div id="chat-intro-header" class="chat-intro-header">
-                <img src="https://i.imgur.com/uoWlYN7.jpeg" alt="Cici Avatar" class="intro-avatar">
-                <h1 class="intro-title">Cici</h1>
-                <p class="intro-subtitle">Your chatbot assistant</p>
-            </div>`;
-    }
 
     state.messages.forEach(msg => {
         const isBot = msg.sender === 'bot';
         
         const wrapper = document.createElement('div');
         wrapper.className = `message-wrapper ${msg.sender}`;
-
-        let content = '';
-        if (isBot) {
-            // Avatar is not shown for bot messages in the new design
-        } else {
-             content += `<button class="audio-button user-audio-button" data-message-id="${msg.id}">${getAudioButtonIcon(msg.id)}</button>`;
-        }
         
         const bubble = document.createElement('div');
         bubble.className = `message-bubble ${msg.sender}`;
 
+        let bubbleContent = '';
         if (msg.imageUrl) {
-            bubble.innerHTML += `<img src="${msg.imageUrl}" alt="Chat content">`;
+            bubbleContent += `<img src="${msg.imageUrl}" alt="Chat content">`;
         }
         if (msg.text) {
-            bubble.innerHTML += typeof msg.text === 'string' ? renderFormattedText(msg.text) : msg.text;
+            bubbleContent += typeof msg.text === 'string' ? renderFormattedText(msg.text) : msg.text;
         }
+        bubble.innerHTML = bubbleContent;
         
-        wrapper.innerHTML = content;
         wrapper.appendChild(bubble);
 
-        if (isBot) {
-            bubble.insertAdjacentHTML('afterend', `<button class="audio-button bot-audio-button" data-message-id="${msg.id}">${getAudioButtonIcon(msg.id)}</button>`);
+        if (isBot && typeof msg.text === 'string' && msg.text.trim()) {
+            const audioButton = document.createElement('button');
+            audioButton.className = 'audio-button';
+            audioButton.dataset.messageId = msg.id;
+            audioButton.setAttribute('aria-label', 'Ouvir mensagem');
+            audioButton.innerHTML = getAudioButtonIcon(msg.id);
+            wrapper.appendChild(audioButton);
         }
 
         container.appendChild(wrapper);
-        lastSender = msg.sender;
     });
 
     if (state.isTyping) {
@@ -265,7 +225,6 @@ function renderMessages() {
 }
 
 function getAudioButtonIcon(messageId) {
-    if (typeof messageId !== 'number') return ''; // Avoid rendering for non-string messages
     const isCurrent = state.playingMessageId === messageId;
     if (state.isAudioLoading && isCurrent) return ICONS.loadingSpinner;
     if (isCurrent) return ICONS.stop;
@@ -281,7 +240,7 @@ function setState(newState) {
     if (oldState.appState !== state.appState) {
         render();
     } else {
-        if (JSON.stringify(oldState.messages) !== JSON.stringify(state.messages) || oldState.isTyping !== state.isTyping) {
+        if (JSON.stringify(oldState.messages) !== JSON.stringify(state.messages) || oldState.isTyping !== state.isTyping || oldState.playingMessageId !== state.playingMessageId || oldState.isAudioLoading !== state.isAudioLoading) {
             renderMessages();
         }
         updateChatUI();
@@ -298,7 +257,7 @@ function setState(newState) {
 function updateChatUI() {
     if (state.appState !== 'chat' || !dom.messageInput) return;
 
-    dom.messageInput.placeholder = "Message";
+    dom.messageInput.placeholder = "Mensagem";
 
     if (state.isTyping) {
         dom.sendButton.disabled = true;
@@ -316,7 +275,6 @@ function updateChatUI() {
 function addMessage(sender, content) {
     const newMessage = { id: Date.now() + Math.random(), sender, ...content };
     
-    // If the chat has only initial messages, replace them with the new flow
     if (state.messages.length === 2 && state.messages[0].id === 1) {
          setState({ messages: [newMessage] });
     } else {
@@ -331,8 +289,10 @@ function resetChat() {
         messages: [...initialMessages],
         conversationStep: 'done',
         inputValue: '',
-        appState: 'chat'
+        attachedFile: null,
+        isTyping: false,
     });
+    updateAttachmentPreview();
 }
 
 async function handleGenericSubmit(prompt, file) {
@@ -452,7 +412,6 @@ function updateAttachmentPreview() {
 // --- MAIN RENDER & BINDING ---
 
 function render() {
-    // The main screen is now in index.html, so we don't need to render it.
     bindDOM();
     renderMessages();
     updateChatUI();
@@ -468,6 +427,7 @@ function bindDOM() {
         dom.attachButton = document.getElementById('attach-button');
         dom.fileInput = document.getElementById('file-input');
         dom.attachmentPreview = document.getElementById('attachment-preview');
+        dom.newChatButton = document.getElementById('new-chat-button');
         
         dom.messageInput.focus();
 
@@ -487,11 +447,16 @@ function bindDOM() {
 
         dom.attachButton.addEventListener('click', () => dom.fileInput.click());
         dom.fileInput.addEventListener('change', handleFileChange);
+        dom.newChatButton.addEventListener('click', resetChat);
         
         dom.chatMessages.addEventListener('click', async e => {
-            const audioButton = e.target.closest('.audio-button');
+            const target = e.target;
+
+            // Audio Button Logic
+            const audioButton = target.closest('.audio-button');
             if (audioButton) {
-                if (!state.isTtsEnabled) return;
+                if (audioContext.state === 'suspended') await audioContext.resume();
+                
                 const messageId = Number(audioButton.dataset.messageId);
                 const message = state.messages.find(m => m.id === messageId);
                 if (message && typeof message.text === 'string' && message.text.trim()) {
@@ -504,8 +469,30 @@ function bindDOM() {
                         setState({ isAudioLoading: false });
                     }
                 }
+                return;
             }
-            const suggestionChip = e.target.closest('.suggestion-chip');
+
+            // Copy Code Logic
+            const copyButton = target.closest('.copy-button');
+            if (copyButton) {
+                const code = copyButton.dataset.code;
+                navigator.clipboard.writeText(code).then(() => {
+                    const iconSpan = copyButton.querySelector('.copy-icon');
+                    const textSpan = copyButton.querySelector('.copy-text');
+                    if (iconSpan) iconSpan.innerHTML = ICONS.check;
+                    if (textSpan) textSpan.textContent = 'Copiado!';
+                    copyButton.disabled = true;
+                    setTimeout(() => {
+                        if (iconSpan) iconSpan.innerHTML = ICONS.clipboard;
+                        if (textSpan) textSpan.textContent = 'Copiar';
+                        copyButton.disabled = false;
+                    }, 2000);
+                });
+                return;
+            }
+
+            // Suggestion Chip Logic
+            const suggestionChip = target.closest('.suggestion-chip');
             if (suggestionChip) {
                 handleGenericSubmit(suggestionChip.dataset.prompt, null);
             }
