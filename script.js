@@ -1,29 +1,54 @@
-import { GoogleGenAI, Modality } from '@google/genai';
+// --- Cici AI Chatbot powered by Mistral AI ---
+// This script handles all client-side logic for the chat application.
+// It uses the Mistral AI API for chat completions and audio transcription.
+// Video generation is not a feature of this application.
 
 const CHAT_HISTORY_KEY = 'cici-chat-history';
-const IMAGE_QUOTA_KEY = 'cici-image-quota';
-const MAX_IMAGES = 4;
-const QUOTA_PERIOD = 24 * 60 * 60 * 1000; // 24 hours
+const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
+const MISTRAL_API_URL = 'https://api.mistral.ai/v1';
 
 // --- ICONS ---
 const ICONS = {
   check: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clip-rule="evenodd" /></svg>`,
   send: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>`,
-  speakerWave: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" /></svg>`,
   stop: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z" /></svg>`,
   loadingSpinner: `<svg class="loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
   xCircle: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
-  clipboard: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3A1.5 1.5 0 0 1 13 3.5v1A1.5 1.5 0 0 1 11.5 6h-3A1.5 1.5 0 0 1 7 4.5v-1Z" /><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h9A1.5 1.5 0 0 1 16 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 15.5v-9Z" /></svg>`
+  clipboard: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3A1.5 1.5 0 0 1 13 3.5v1A1.5 1.5 0 0 1 11.5 6h-3A1.5 1.5 0 0 1 7 4.5v-1Z" /><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h9A1.5 1.5 0 0 1 16 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 15.5v-9Z" /></svg>`,
+  microphone: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.25 4.5a3.75 3.75 0 1 1 7.5 0v8.25a3.75 3.75 0 1 1-7.5 0V4.5Z" /><path d="M6 10.5a.75.75 0 0 1 .75.75v.75a4.5 4.5 0 0 0 9 0v-.75a.75.75 0 0 1 1.5 0v.75a6 6 0 1 1-12 0v-.75a.75.75 0 0 1 .75-.75Z" /></svg>`,
+  thumbUp: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M1 8.25a1.25 1.25 0 1 1 2.5 0v7.5a1.25 1.25 0 1 1-2.5 0v-7.5ZM11 3.25a1.75 1.75 0 0 1 1.75 1.75v3.258a1.75 1.75 0 0 0 .822 1.45l.978.558c.43.247.818.572 1.15.962V12a1.75 1.75 0 0 1-1.75 1.75h-3.418a1.75 1.75 0 0 1-1.683-1.325L8.5 8.25V5a1.75 1.75 0 0 1 1.75-1.75h.75Z" /></svg>`,
+  thumbDown: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M1 11.75a1.25 1.25 0 1 0 2.5 0v-7.5a1.25 1.25 0 1 0-2.5 0v7.5ZM11 16.75a1.75 1.75 0 0 0 1.75-1.75v-3.258a1.75 1.75 0 0 1 .822-1.45l.978-.558c.43-.247.818-.572 1.15-.962V8a1.75 1.75 0 0 0-1.75-1.75h-3.418a1.75 1.75 0 0 0-1.683 1.325L8.5 11.75V15a1.75 1.75 0 0 0 1.75 1.75h.75Z" /></svg>`,
 };
 
 // --- DOM ELEMENTS ---
-const appContent = document.getElementById('app-content');
-let dom = {}; // To be populated when a screen is rendered
+const dom = {
+    appContent: document.getElementById('app-content'),
+    chatScreen: document.getElementById('chat-screen'),
+    chatHeader: document.querySelector('.chat-header'),
+    newChatButton: document.getElementById('new-chat-button'),
+    chatMessages: document.getElementById('chat-messages'),
+    chatFooter: document.querySelector('.chat-footer'),
+    attachmentPreview: document.getElementById('attachment-preview'),
+    chatForm: document.getElementById('chat-form'),
+    attachButton: document.getElementById('attach-button'),
+    fileInput: document.getElementById('file-input'),
+    messageInput: document.getElementById('message-input'),
+    sendButton: document.getElementById('send-button'),
+    recordButton: document.getElementById('record-button'),
+};
 
 // --- STATE ---
 const initialMessages = [
     { id: 1, sender: 'bot', text: 'Olá! Como posso te ajudar hoje? 😊' },
-    { id: 2, sender: 'bot', text: 'Sinta-se à vontade para me perguntar qualquer coisa!' }
+    { 
+        id: 2, 
+        sender: 'bot', 
+        text: 'Sinta-se à vontade para me perguntar qualquer coisa! Você também pode tentar uma dessas ações:',
+        actions: [
+            { id: 'track_goal', text: 'Track Goal', clicked: false },
+            { id: 'set_reminder', text: 'Set Reminder', clicked: false }
+        ]
+    }
 ];
 
 let state = {
@@ -33,109 +58,167 @@ let state = {
   inputValue: '',
   isTyping: false,
   attachedFile: null,
-  isTtsEnabled: true,
-  playingMessageId: null,
-  isAudioLoading: false,
+  isRecording: false,
+  isTranscribing: false,
 };
 
-// --- AUDIO UTILITIES & TTS ---
-let audioPlayer = null;
-let audioContext = null;
-
-function initAudioContext() {
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+// --- MISTRAL API & HELPERS ---
+function base64ToBlob(base64, mimeType) {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
 }
 
-function decodeBase64(base64) {
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+// Transcribes audio using the Mistral AI Whisper model.
+async function transcribeAudioWithMistral(audioFile) {
+    const audioBlob = base64ToBlob(audioFile.data, audioFile.mimeType);
+    
+    const formData = new FormData();
+    formData.append('file', audioBlob, audioFile.name);
+    formData.append('model', 'mistral-whisper');
+
+    const response = await fetch(`${MISTRAL_API_URL}/audio/transcriptions`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${MISTRAL_API_KEY}`,
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Mistral transcription error:', errorData);
+        throw new Error('Falha ao transcrever o áudio.');
     }
-    return bytes;
+
+    const data = await response.json();
+    return data.text;
 }
 
-async function decodeAudioData(data) {
-    const dataInt16 = new Int16Array(data.buffer);
-    const frameCount = dataInt16.length;
-    const buffer = audioContext.createBuffer(1, frameCount, 24000);
-    const channelData = buffer.getChannelData(0);
-    for (let i = 0; i < frameCount; i++) {
-        channelData[i] = dataInt16[i] / 32768.0;
-    }
-    return buffer;
-}
+// Fetches a chat completion from the Mistral AI API.
+async function getMistralChatCompletion(prompt, imageFile, history) {
+    const systemInstruction = "Você é a Cici, uma assistente de IA especialista em programação. Seu tom é amigável e encorajador. Ao fornecer código, sempre use blocos de código markdown (```) e especifique a linguagem (por exemplo, ```javascript) para formatação. Explique o código de forma clara e concisa.";
 
-function stopCurrentAudio() {
-    if (audioPlayer) {
-        try {
-            audioPlayer.stop();
-        } catch (e) {
-            // Ignore errors if already stopped
+    const messages = [
+        { role: 'system', content: systemInstruction }
+    ];
+
+    history.forEach(msg => {
+        if (msg.sender === 'user') {
+            const contentParts = [];
+            if (msg.text) {
+                contentParts.push({ type: 'text', text: msg.text });
+            }
+            if (msg.imageUrl) {
+                 contentParts.push({ type: 'image_url', image_url: { url: msg.imageUrl } });
+            }
+            if (contentParts.length > 0) {
+                 messages.push({ role: 'user', content: contentParts });
+            }
+        } else if (msg.sender === 'bot' && typeof msg.text === 'string') {
+            if (!msg.text.includes('<div class="error-message">')) {
+                messages.push({ role: 'assistant', content: msg.text });
+            }
         }
-        audioPlayer.disconnect();
-        audioPlayer = null;
+    });
+
+    const currentUserContent = [];
+    if (prompt) {
+        currentUserContent.push({ type: 'text', text: prompt });
     }
-    state.playingMessageId = null;
-    state.isAudioLoading = false;
-    renderMessages();
+    if (imageFile) {
+        currentUserContent.push({ type: 'image_url', image_url: { url: `data:${imageFile.mimeType};base64,${imageFile.data}` } });
+    }
+    messages.push({ role: 'user', content: currentUserContent });
+    
+    const response = await fetch(`${MISTRAL_API_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${MISTRAL_API_KEY}`,
+        },
+        body: JSON.stringify({
+            model: 'mistral-large-latest',
+            messages: messages,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Mistral chat error:', errorData);
+        throw new Error('Falha ao se comunicar com a IA.');
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
 }
 
-async function playTextToSpeech(text) {
+// --- AUDIO RECORDING ---
+let mediaRecorder = null;
+let audioChunks = [];
+
+async function startRecording() {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash-preview-tts",
-            contents: [{ parts: [{ text: `Say cheerfully: ${text}` }] }],
-            config: {
-                responseModalities: [Modality.AUDIO],
-                speechConfig: {
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
-                },
-            },
-        });
-        const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if (base64Audio && audioContext) {
-            const audioBuffer = await decodeAudioData(decodeBase64(base64Audio));
-            const source = audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(audioContext.destination);
-            source.onended = stopCurrentAudio;
-            source.start();
-            audioPlayer = source;
-        } else {
-            throw new Error("No audio data received.");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+        mediaRecorder.onstop = handleRecordingStop;
+        mediaRecorder.start();
+        setState({ isRecording: true });
+    } catch (err) {
+        console.error("Error accessing microphone:", err);
+        alert("Não foi possível acessar o microfone. Verifique as permissões do seu navegador.");
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        setState({ isRecording: false });
+    }
+}
+
+async function transcribeAndFillInput(audioFile) {
+    setState({ isTranscribing: true });
+    try {
+        const transcription = await transcribeAudioWithMistral(audioFile);
+        setState({ inputValue: transcription });
+        if (dom.messageInput) {
+            dom.messageInput.value = transcription;
+            dom.messageInput.focus();
+            dom.messageInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger UI update
         }
     } catch (error) {
-        console.error("TTS generation failed:", error);
-        stopCurrentAudio();
+        console.error("Transcription failed", error);
+        alert(error.message || "Não foi possível transcrever o áudio.");
+    } finally {
+        setState({ isTranscribing: false });
     }
 }
 
-// --- IMAGE QUOTA ---
-const imageGenerationQuota = {
-    get: () => {
-        const stored = localStorage.getItem(IMAGE_QUOTA_KEY);
-        if (!stored) return { count: MAX_IMAGES, resetTime: Date.now() + QUOTA_PERIOD };
-        const quota = JSON.parse(stored);
-        if (Date.now() > quota.resetTime) {
-            return { count: MAX_IMAGES, resetTime: Date.now() + QUOTA_PERIOD };
-        }
-        return quota;
-    },
-    use: () => {
-        let quota = imageGenerationQuota.get();
-        if (quota.count > 0) {
-            quota.count -= 1;
-            localStorage.setItem(IMAGE_QUOTA_KEY, JSON.stringify(quota));
-            return true;
-        }
-        return false;
-    }
-};
+function handleRecordingStop() {
+    if (audioChunks.length === 0) return;
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = () => {
+        const base64Audio = reader.result.split(',')[1];
+        const audioFile = {
+            data: base64Audio,
+            mimeType: 'audio/webm',
+            name: `audio-message-${Date.now()}.webm`
+        };
+        transcribeAndFillInput(audioFile);
+    };
+}
 
 // --- TEMPLATES / RENDER FUNCTIONS ---
 function sanitize(str) {
@@ -174,15 +257,12 @@ function renderFormattedText(text) {
 }
 
 function renderMessages() {
-    if (state.appState !== 'chat') return;
+    if (!dom.chatMessages) return;
     const container = dom.chatMessages;
-    if (!container) return;
 
     container.innerHTML = '';
 
     state.messages.forEach(msg => {
-        const isBot = msg.sender === 'bot';
-        
         const wrapper = document.createElement('div');
         wrapper.className = `message-wrapper ${msg.sender}`;
         
@@ -193,20 +273,58 @@ function renderMessages() {
         if (msg.imageUrl) {
             bubbleContent += `<img src="${msg.imageUrl}" alt="Chat content">`;
         }
+        if (msg.audioUrl) {
+            bubbleContent += `<audio controls src="${msg.audioUrl}"></audio>`;
+        }
         if (msg.text) {
             bubbleContent += typeof msg.text === 'string' ? renderFormattedText(msg.text) : msg.text;
         }
         bubble.innerHTML = bubbleContent;
         
+        if (msg.actions && msg.actions.length > 0) {
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'message-actions';
+            msg.actions.forEach(action => {
+                const button = document.createElement('button');
+                button.className = 'action-button';
+                button.dataset.messageId = msg.id;
+                button.dataset.actionId = action.id;
+                if (action.clicked) {
+                    button.disabled = true;
+                    button.innerHTML = `${ICONS.check} ${sanitize(action.text)}`;
+                } else {
+                    button.textContent = action.text;
+                }
+                actionsContainer.appendChild(button);
+            });
+            bubble.appendChild(actionsContainer);
+        }
+
         wrapper.appendChild(bubble);
 
-        if (isBot && typeof msg.text === 'string' && msg.text.trim()) {
-            const audioButton = document.createElement('button');
-            audioButton.className = 'audio-button';
-            audioButton.dataset.messageId = msg.id;
-            audioButton.setAttribute('aria-label', 'Ouvir mensagem');
-            audioButton.innerHTML = getAudioButtonIcon(msg.id);
-            wrapper.appendChild(audioButton);
+        if (msg.sender === 'bot' && typeof msg.text === 'string' && !msg.text.includes('<div class="error-message">')) {
+            const feedbackContainer = document.createElement('div');
+            feedbackContainer.className = 'feedback-buttons';
+            
+            const isFeedbackDisabled = msg.feedback !== undefined;
+
+            const upButton = document.createElement('button');
+            upButton.className = `feedback-button ${msg.feedback === 'up' ? 'selected' : ''} ${isFeedbackDisabled ? 'disabled' : ''}`;
+            upButton.innerHTML = ICONS.thumbUp;
+            upButton.dataset.messageId = msg.id;
+            upButton.dataset.feedback = 'up';
+            if (isFeedbackDisabled) upButton.disabled = true;
+
+            const downButton = document.createElement('button');
+            downButton.className = `feedback-button ${msg.feedback === 'down' ? 'selected' : ''} ${isFeedbackDisabled ? 'disabled' : ''}`;
+            downButton.innerHTML = ICONS.thumbDown;
+            downButton.dataset.messageId = msg.id;
+            downButton.dataset.feedback = 'down';
+            if (isFeedbackDisabled) downButton.disabled = true;
+
+            feedbackContainer.appendChild(upButton);
+            feedbackContainer.appendChild(downButton);
+            wrapper.appendChild(feedbackContainer);
         }
 
         container.appendChild(wrapper);
@@ -224,29 +342,20 @@ function renderMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
-function getAudioButtonIcon(messageId) {
-    const isCurrent = state.playingMessageId === messageId;
-    if (state.isAudioLoading && isCurrent) return ICONS.loadingSpinner;
-    if (isCurrent) return ICONS.stop;
-    return ICONS.speakerWave;
-}
-
 // --- LOGIC & EVENT HANDLERS ---
-
 function setState(newState) {
     const oldState = { ...state };
     state = { ...state, ...newState };
     
-    if (oldState.appState !== state.appState) {
-        render();
-    } else {
-        if (JSON.stringify(oldState.messages) !== JSON.stringify(state.messages) || oldState.isTyping !== state.isTyping || oldState.playingMessageId !== state.playingMessageId || oldState.isAudioLoading !== state.isAudioLoading) {
-            renderMessages();
-        }
-        updateChatUI();
+    if (JSON.stringify(oldState.messages) !== JSON.stringify(state.messages) || oldState.isTyping !== state.isTyping) {
+        renderMessages();
     }
+    updateChatUI();
     
-    if (state.appState === 'chat' && state.messages.length > initialMessages.length) {
+    const isInitialState = state.messages.length === initialMessages.length &&
+                           state.messages.every((msg, i) => msg.id === initialMessages[i].id);
+
+    if (!isInitialState) {
         localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify({
             messages: state.messages,
             conversationStep: state.conversationStep
@@ -255,19 +364,49 @@ function setState(newState) {
 }
 
 function updateChatUI() {
-    if (state.appState !== 'chat' || !dom.messageInput) return;
+    if (!dom.messageInput) return;
 
     dom.messageInput.placeholder = "Mensagem";
 
-    if (state.isTyping) {
-        dom.sendButton.disabled = true;
-        dom.sendButton.innerHTML = ICONS.loadingSpinner;
+    const hasInput = state.inputValue.trim() !== '' || state.attachedFile;
+    const isBotTyping = state.isTyping;
+    const isUserRecording = state.isRecording;
+    const isUserTranscribing = state.isTranscribing;
+
+    // Button visibility
+    if (isUserRecording || isUserTranscribing) {
+        dom.sendButton.style.display = 'none';
+        dom.recordButton.style.display = 'flex';
+    } else if (hasInput || isBotTyping) {
+        dom.sendButton.style.display = 'flex';
+        dom.recordButton.style.display = 'none';
     } else {
-        const canSend = state.inputValue.trim() || state.attachedFile;
-        dom.sendButton.disabled = !canSend;
-        dom.sendButton.innerHTML = ICONS.send;
+        dom.sendButton.style.display = 'none';
+        dom.recordButton.style.display = 'flex';
     }
 
+    // Button content and styles
+    dom.sendButton.innerHTML = isBotTyping ? ICONS.loadingSpinner : ICONS.send;
+    
+    if (isUserRecording) {
+        dom.recordButton.innerHTML = ICONS.stop;
+        dom.recordButton.classList.add('recording');
+    } else if (isUserTranscribing) {
+        dom.recordButton.innerHTML = ICONS.loadingSpinner;
+        dom.recordButton.classList.remove('recording');
+    } else {
+        dom.recordButton.innerHTML = ICONS.microphone;
+        dom.recordButton.classList.remove('recording');
+    }
+
+    // Disabled states for inputs
+    const isBusy = isBotTyping || isUserRecording || isUserTranscribing;
+    dom.messageInput.disabled = isBusy;
+    dom.attachButton.disabled = isBusy;
+    dom.sendButton.disabled = isBotTyping || !hasInput;
+    dom.recordButton.disabled = isBotTyping || isUserTranscribing;
+    
+    // Adjust textarea height
     dom.messageInput.style.height = 'auto';
     dom.messageInput.style.height = `${dom.messageInput.scrollHeight}px`;
 }
@@ -275,15 +414,17 @@ function updateChatUI() {
 function addMessage(sender, content) {
     const newMessage = { id: Date.now() + Math.random(), sender, ...content };
     
-    if (state.messages.length === 2 && state.messages[0].id === 1) {
-         setState({ messages: [newMessage] });
+    const isInitialState = state.messages.length === initialMessages.length &&
+                           state.messages.every((msg, i) => msg.id === initialMessages[i].id);
+
+    if (sender === 'user' && isInitialState) {
+        setState({ messages: [newMessage] });
     } else {
-         setState({ messages: [...state.messages, newMessage] });
+        setState({ messages: [...state.messages, newMessage] });
     }
 }
 
 function resetChat() {
-    stopCurrentAudio();
     localStorage.removeItem(CHAT_HISTORY_KEY);
     setState({
         messages: [...initialMessages],
@@ -292,74 +433,48 @@ function resetChat() {
         attachedFile: null,
         isTyping: false,
     });
+    if (dom.messageInput) {
+        dom.messageInput.value = '';
+    }
     updateAttachmentPreview();
 }
 
-async function handleGenericSubmit(prompt, file) {
+async function handleGenericSubmit(prompt, imageFile) {
     const userMessageContent = {};
     if (prompt) userMessageContent.text = prompt;
-    if (file) userMessageContent.imageUrl = `data:${file.mimeType};base64,${file.data}`;
+    if (imageFile) {
+        userMessageContent.imageUrl = `data:${imageFile.mimeType};base64,${imageFile.data}`;
+    }
 
     addMessage('user', userMessageContent);
     setState({ inputValue: '', attachedFile: null, isTyping: true });
+    if(dom.messageInput) dom.messageInput.value = '';
     updateAttachmentPreview();
 
-    const imageGenRegex = /^(crie|gere|desenhe|faça)\s+(uma|um)\s+(imagem|desenho|foto)/i;
-
     try {
-        if (imageGenRegex.test(prompt) && !file) {
-            const quota = imageGenerationQuota.get();
-            if (imageGenerationQuota.use()) {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash-image',
-                    contents: { parts: [{ text: prompt }] },
-                    config: { responseModalities: [Modality.IMAGE] },
-                });
-                const firstPart = response.candidates?.[0]?.content?.parts?.[0];
-                if (firstPart?.inlineData) {
-                    addMessage('bot', { imageUrl: `data:image/png;base64,${firstPart.inlineData.data}` });
-                } else {
-                    throw new Error("Nenhuma imagem foi gerada.");
-                }
-            } else {
-                addMessage('bot', { text: `Desculpe, você atingiu seu limite de ${MAX_IMAGES} imagens por 24 horas. Seu limite será zerado em ${new Date(quota.resetTime).toLocaleTimeString()}.` });
-            }
+        const chatHistory = state.messages.slice(0, -1);
+        const botResponse = await getMistralChatCompletion(prompt, imageFile, chatHistory);
+        
+        if (botResponse) {
+            addMessage('bot', { text: botResponse });
         } else {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-            const modelParts = [];
-            if (prompt) modelParts.push({ text: prompt });
-            if (file) modelParts.push({ inlineData: { mimeType: file.mimeType, data: file.data } });
-
-            const systemInstruction = "Você é a Cici, uma assistente de IA especialista em programação. Seu tom é amigável e encorajador. Ao fornecer código, sempre use blocos de código markdown (```) e especifique a linguagem (por exemplo, ```javascript) para formatação. Explique o código de forma clara e concisa.";
-            
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: { parts: modelParts },
-                config: { systemInstruction },
-            });
-            const botResponse = response.text;
-            if (botResponse) {
-                addMessage('bot', { text: botResponse });
-            } else {
-                throw new Error("Invalid response structure from API");
-            }
+            throw new Error("Invalid response structure from API");
         }
     } catch (error) {
         console.error("API call failed", error);
         const retryId = `retry-${Date.now()}`;
         const errorMessageHTML = `
             <div class="error-message">
-                <p>Desculpe, algo deu errado.</p>
+                <p>${error.message || 'Desculpe, algo deu errado.'}</p>
                 <button class="retry-button" id="${retryId}">Tentar Novamente</button>
             </div>`;
         addMessage('bot', { text: errorMessageHTML });
         
         setTimeout(() => {
             document.getElementById(retryId)?.addEventListener('click', () => {
-                const newMessages = state.messages.slice(0, -2);
+                const newMessages = state.messages.slice(0, -2); // Remove user and error message
                 setState({ messages: newMessages });
-                handleGenericSubmit(prompt, file);
+                handleGenericSubmit(prompt, imageFile);
             });
         }, 0);
     } finally {
@@ -385,148 +500,144 @@ function handleFileChange(event) {
     } else if (file) {
         alert("Por favor, selecione um arquivo de imagem.");
     }
-    if (event.target) event.target.value = ''; // Reset file input
+    if (event.target) event.target.value = '';
 }
 
 function updateAttachmentPreview() {
-    if (state.appState !== 'chat') return;
+    if (!dom.attachmentPreview) return;
     const preview = dom.attachmentPreview;
     if (state.attachedFile) {
+        const imageUrl = `data:${state.attachedFile.mimeType};base64,${state.attachedFile.data}`;
         preview.innerHTML = `
-            <img src="data:${state.attachedFile.mimeType};base64,${state.attachedFile.data}" alt="Preview" />
+            <img src="${imageUrl}" alt="Anexo">
             <span>${sanitize(state.attachedFile.name)}</span>
-            <button id="remove-attachment-button">${ICONS.xCircle}</button>
+            <button type="button" id="remove-attachment-button" aria-label="Remover anexo">
+                ${ICONS.xCircle}
+            </button>
         `;
         preview.style.display = 'flex';
-        document.getElementById('remove-attachment-button').addEventListener('click', () => {
-            setState({ attachedFile: null });
-            updateAttachmentPreview();
-        });
-    } else {
-        preview.style.display = 'none';
-        preview.innerHTML = '';
-    }
-    updateChatUI();
-}
-
-// --- MAIN RENDER & BINDING ---
-
-function render() {
-    bindDOM();
-    renderMessages();
-    updateChatUI();
-}
-
-function bindDOM() {
-    dom = {}; // Reset DOM references
-    if (state.appState === 'chat') {
-        dom.chatMessages = document.getElementById('chat-messages');
-        dom.chatForm = document.getElementById('chat-form');
-        dom.messageInput = document.getElementById('message-input');
-        dom.sendButton = document.getElementById('send-button');
-        dom.attachButton = document.getElementById('attach-button');
-        dom.fileInput = document.getElementById('file-input');
-        dom.attachmentPreview = document.getElementById('attachment-preview');
-        dom.newChatButton = document.getElementById('new-chat-button');
-        
-        dom.messageInput.focus();
-
-        dom.messageInput.addEventListener('input', e => setState({ inputValue: e.target.value }));
-        dom.messageInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                dom.chatForm.requestSubmit();
-            }
-        });
-        
-        dom.chatForm.addEventListener('submit', e => {
-            e.preventDefault();
-            if (state.isTyping || (!state.inputValue.trim() && !state.attachedFile)) return;
-            handleGenericSubmit(state.inputValue, state.attachedFile);
-        });
-
-        dom.attachButton.addEventListener('click', () => dom.fileInput.click());
-        dom.fileInput.addEventListener('change', handleFileChange);
-        dom.newChatButton.addEventListener('click', resetChat);
-        
-        dom.chatMessages.addEventListener('click', async e => {
-            const target = e.target;
-
-            // Audio Button Logic
-            const audioButton = target.closest('.audio-button');
-            if (audioButton) {
-                if (audioContext.state === 'suspended') await audioContext.resume();
-                
-                const messageId = Number(audioButton.dataset.messageId);
-                const message = state.messages.find(m => m.id === messageId);
-                if (message && typeof message.text === 'string' && message.text.trim()) {
-                    if (state.playingMessageId === messageId) {
-                        stopCurrentAudio();
-                    } else {
-                        stopCurrentAudio();
-                        setState({ playingMessageId: messageId, isAudioLoading: true });
-                        await playTextToSpeech(message.text);
-                        setState({ isAudioLoading: false });
-                    }
-                }
-                return;
-            }
-
-            // Copy Code Logic
-            const copyButton = target.closest('.copy-button');
-            if (copyButton) {
-                const code = copyButton.dataset.code;
-                navigator.clipboard.writeText(code).then(() => {
-                    const iconSpan = copyButton.querySelector('.copy-icon');
-                    const textSpan = copyButton.querySelector('.copy-text');
-                    if (iconSpan) iconSpan.innerHTML = ICONS.check;
-                    if (textSpan) textSpan.textContent = 'Copiado!';
-                    copyButton.disabled = true;
-                    setTimeout(() => {
-                        if (iconSpan) iconSpan.innerHTML = ICONS.clipboard;
-                        if (textSpan) textSpan.textContent = 'Copiar';
-                        copyButton.disabled = false;
-                    }, 2000);
-                });
-                return;
-            }
-
-            // Suggestion Chip Logic
-            const suggestionChip = target.closest('.suggestion-chip');
-            if (suggestionChip) {
-                handleGenericSubmit(suggestionChip.dataset.prompt, null);
-            }
-        });
-    }
-}
-
-// --- INITIALIZATION ---
-function init() {
-    initAudioContext();
-    
-    const saved = localStorage.getItem(CHAT_HISTORY_KEY);
-    let initialState = {};
-    if (saved) {
-        try {
-            initialState = JSON.parse(saved);
-            if (!initialState.messages || initialState.messages.length === 0) {
-                 initialState.messages = [...initialMessages];
-            }
-        } catch (error) {
-            console.error("Failed to parse chat history", error);
-            localStorage.removeItem(CHAT_HISTORY_KEY);
-            initialState.messages = [...initialMessages];
+        const removeButton = document.getElementById('remove-attachment-button');
+        if (removeButton) {
+            removeButton.addEventListener('click', () => {
+                setState({ attachedFile: null });
+                updateAttachmentPreview();
+            });
         }
     } else {
-        initialState.messages = [...initialMessages];
+        preview.innerHTML = '';
+        preview.style.display = 'none';
     }
-    
-    setState({
-        ...state,
-        ...initialState,
-        appState: 'chat',
-        conversationStep: 'done',
+}
+
+function addEventListeners() {
+    dom.chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (state.isTyping || (!state.inputValue.trim() && !state.attachedFile)) return;
+        handleGenericSubmit(state.inputValue.trim(), state.attachedFile);
     });
+
+    dom.messageInput.addEventListener('input', (e) => {
+        setState({ inputValue: e.target.value });
+    });
+
+    dom.messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            dom.chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+    });
+
+    dom.newChatButton.addEventListener('click', resetChat);
+
+    dom.attachButton.addEventListener('click', () => dom.fileInput.click());
+    dom.fileInput.addEventListener('change', handleFileChange);
+    
+    dom.recordButton.addEventListener('click', () => {
+        if (state.isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    });
+
+    dom.chatMessages.addEventListener('click', (e) => {
+        const copyButton = e.target.closest('.copy-button');
+        if (copyButton && !copyButton.disabled) {
+            navigator.clipboard.writeText(copyButton.dataset.code);
+            copyButton.disabled = true;
+            const textEl = copyButton.querySelector('.copy-text');
+            const iconEl = copyButton.querySelector('.copy-icon');
+            if (textEl) textEl.textContent = 'Copiado!';
+            if (iconEl) iconEl.innerHTML = ICONS.check;
+            setTimeout(() => {
+                copyButton.disabled = false;
+                if (textEl) textEl.textContent = 'Copiar';
+                if (iconEl) iconEl.innerHTML = ICONS.clipboard;
+            }, 2000);
+        }
+        
+        const actionButton = e.target.closest('.action-button');
+        if (actionButton && !actionButton.disabled) {
+            const { messageId, actionId } = actionButton.dataset;
+            const messages = state.messages.map(msg => {
+                if (String(msg.id) === messageId) {
+                    const updatedActions = msg.actions.map(act => 
+                        act.id === actionId ? { ...act, clicked: true } : act
+                    );
+                    return { ...msg, actions: updatedActions };
+                }
+                return msg;
+            });
+            setState({ messages });
+
+            const message = state.messages.find(msg => String(msg.id) === messageId);
+            const action = message?.actions.find(act => act.id === actionId);
+            
+            if (action) {
+                addMessage('user', { text: `Cliquei em: ${action.text}` });
+                setState({ isTyping: true });
+                setTimeout(() => {
+                     addMessage('bot', { text: `Você realizou a ação: "${action.text}". Como posso prosseguir?` });
+                     setState({ isTyping: false });
+                }, 1500);
+            }
+        }
+        
+        const feedbackButton = e.target.closest('.feedback-button');
+        if (feedbackButton && !feedbackButton.disabled) {
+            const { messageId, feedback } = feedbackButton.dataset;
+            const messages = state.messages.map(msg => {
+                if (String(msg.id) === messageId) {
+                    return { ...msg, feedback };
+                }
+                return msg;
+            });
+            setState({ messages });
+        }
+    });
+}
+
+function init() {
+    const savedState = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (savedState) {
+        try {
+            const { messages, conversationStep } = JSON.parse(savedState);
+            if (Array.isArray(messages)) {
+                state.messages = messages;
+                state.conversationStep = conversationStep || 'done';
+            } else {
+                 state.messages = [...initialMessages];
+            }
+        } catch (e) {
+             console.error("Failed to parse chat history", e);
+             state.messages = [...initialMessages];
+        }
+    } else {
+        state.messages = [...initialMessages];
+    }
+    addEventListeners();
+    renderMessages();
+    updateChatUI();
 }
 
 document.addEventListener('DOMContentLoaded', init);
