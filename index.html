@@ -1,80 +1,286 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cici AI Chatbot</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Microsoft Clarity -->
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "YOUR_CLARITY_TAG");
-    </script>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=YOUR_ADSENSE_CLIENT_ID"
-     crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cici — Em Breve</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #6a3fc8;
+            --gradient-light: linear-gradient(135deg, #dbe7ff, #f3d9ff);
+            --gradient-dark: linear-gradient(135deg, #2e1b55, #1c0f33);
+            --glass-light: rgba(255,255,255,0.55);
+            --glass-dark: rgba(30, 30, 30, 0.55);
+            --logo-size: 80px; /* Tamanho do logo */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: "Inter", sans-serif;
+            transition: background 0.5s ease, color 0.4s ease;
+        }
+
+        body.light {
+            background: var(--gradient-light);
+            color: #333;
+        }
+
+        body.dark {
+            background: var(--gradient-dark);
+            color: #e5e5e5;
+        }
+
+        /* Canvas */
+        #particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 5;
+            max-width: 800px;
+            margin: 0 auto;
+            margin-top: 50px;
+            padding: 45px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+            text-align: center;
+            backdrop-filter: blur(12px);
+            animation: fadeUp 0.9s ease forwards;
+        }
+
+        body.light .container { background: var(--glass-light); }
+        body.dark .container { background: var(--glass-dark); }
+
+        @keyframes fadeUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Logo */
+        .logo {
+            width: var(--logo-size);
+            height: var(--logo-size);
+            margin: -20px auto 15px; /* Ajuste para centralizar acima do conteúdo */
+            background-image: url('https://i.imgur.com/uoWlYN7.jpeg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        p { font-size: 1.2rem; }
+
+        /* Preview Cici */
+        .preview-card {
+            margin-top: 35px;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-14px); }
+            100% { transform: translateY(0px); }
+        }
+
+        body.light .preview-card { background: #f8f2ff; border: 2px solid #d5c3ff; }
+        body.dark .preview-card { background: #2b1c40; border: 2px solid #3d285a; }
+
+        .preview-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 15px auto 20px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+        }
+
+        .notify-btn {
+            margin-top: 25px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600; /* Mais destaque para o botão */
+            color: #fff;
+            cursor: pointer;
+            background: var(--primary);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .notify-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 22px rgba(0,0,0,0.3);
+        }
+        
+        /* Ocultar o loader, já que a ação é um redirecionamento */
+        .loader {
+            display: none; 
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            opacity: 0.75;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            p { font-size: 1rem; }
+            .container { margin-top: 30px; padding: 35px 20px; }
+            .logo { margin: -10px auto 10px; }
+        }
+    </style>
 </head>
-<body>
-    <main class="main-container">
-        <div class="phone-frame">
-            <div id="app-content" class="app-content">
-                <div class="screen chat-screen" id="chat-screen">
-                    <div class="chat-header">
-                        <div class="header-info">
-                            <img src="https://i.imgur.com/uoWlYN7.jpeg" alt="Cici Avatar" class="header-avatar">
-                            <span class="header-title">Cici</span>
-                        </div>
-                        <button id="new-chat-button" class="icon-button" aria-label="Nova Conversa">
-                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="chat-messages" class="chat-messages">
-                        <div class="message-wrapper bot">
-                            <div class="message-bubble bot">
-                                Olá! Como posso te ajudar hoje? 😊
-                            </div>
-                        </div>
-                        <div class="message-wrapper bot">
-                            <div class="message-bubble bot">
-                                Sinta-se à vontade para me perguntar qualquer coisa!
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chat-footer">
-                       <div class="chat-input-area">
-                            <div id="attachment-preview" class="attachment-preview" style="display: none;">
-                                <!-- Attachment preview rendered here by JS -->
-                            </div>
-                            <form id="chat-form" class="chat-form">
-                                <button type="button" id="attach-button" class="icon-button" aria-label="Anexar arquivo">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.122 2.122l7.81-7.81" /></svg>
-                                </button>
-                                <input type="file" id="file-input" accept="image/*" class="hidden" />
-                                <textarea id="message-input" rows="1" placeholder="Mensagem" class="message-input"></textarea>
-                                <button type="submit" id="send-button" class="send-button" disabled>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
-                                </button>
-                                <button type="button" id="record-button" class="record-button"></button>
-                            </form>
-                       </div>
-                       <div class="legal-links">
-                            <a href="https://termos.orpheostudio.com.br" target="_blank" rel="noopener noreferrer">Termos</a>
-                            <span>&bull;</span>
-                            <a href="https://politicas.orpheostudio.com.br" target="_blank" rel="noopener noreferrer">Políticas</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+<body class="light">
+
+<canvas id="particles"></canvas>
+
+<div class="container">
+    
+    <div class="logo"></div>
+
+    <h1>Cici está chegando ✨</h1>
+    <p>A futura **inteligência assistiva** da AmplaAI está quase pronta.</p>
+    <p>Feita para ser intuitiva, acolhedora e moderna — e sim, com mais personalidade do que deveria.</p>
+
+    <div class="preview-card">
+        <div class="preview-image"
+             style="background-image:url('https://i.imgur.com/uoWlYN7.jpeg');">
         </div>
-    </main>
-    <script type="module" src="script.js"></script>
+        <p>
+            “Eu sou a Cici, e estou me preparando pra conhecer você.  
+            Falta pouco para eu estar totalmente online.”
+        </p>
+    </div>
+
+    <button class="notify-btn" onclick="notifyMe()">
+        Me avise quando lançar 🚀
+    </button>
+
+    <div class="loader"></div>
+
+    <footer>
+        © 2025 Cici • AmplaAI
+    </footer>
+</div>
+
+<script>
+/* ============================
+   MODO DARK AUTOMÁTICO
+=========================== */
+function aplicarTema() {
+    // Aplica o tema Dark entre 19h (7pm) e 6h (6am)
+    const horas = new Date().getHours();
+    document.body.className = (horas >= 19 || horas <= 6) ? "dark" : "light";
+}
+aplicarTema();
+
+/* ============================
+   BOTÃO DE NOTIFICAÇÃO (Conectado ao Google Forms)
+=========================== */
+function notifyMe() {
+    const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfZ0Lbr_xsrus2DAKYTOHf_zn3DHKwx8Fwtv-89Q55ivZqzqA/viewform?usp=pp_url";
+    
+    // Abre o formulário em uma nova aba
+    window.open(googleFormUrl, '_blank');
+}
+
+/* ============================
+   PARTÍCULAS
+=========================== */
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+let particlesArray = [];
+const total = 75;
+
+// Garante que o canvas se ajusta ao tamanho da janela
+function resizeCanvas() {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    init();
+}
+resizeCanvas(); // Inicializa
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.7;
+        this.speedY = (Math.random() - 0.5) * 0.7;
+        this.color = "rgba(110, 60, 200, 0.5)"; // Cor ajustada para ter transparência
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+}
+
+function init() {
+    particlesArray = [];
+    for (let i = 0; i < total; i++) particlesArray.push(new Particle());
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particlesArray.forEach((p, i) => {
+        p.update();
+        p.draw();
+
+        // Linhas de conexão entre partículas próximas
+        for (let j = i; j < particlesArray.length; j++) {
+            const dx = p.x - particlesArray[j].x;
+            const dy = p.y - particlesArray[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 130) {
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(110,60,200,0.15)";
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                ctx.stroke();
+            }
+        }
+    });
+
+    requestAnimationFrame(animate);
+}
+
+window.onresize = resizeCanvas; // Chama resizeCanvas na mudança de tamanho da janela
+
+init();
+animate();
+</script>
+
 </body>
 </html>
