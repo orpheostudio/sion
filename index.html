@@ -3,284 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cici — Em Breve</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+    <title>Aira AI by AmplaAI</title>
     <style>
-        :root {
-            --primary: #6a3fc8;
-            --gradient-light: linear-gradient(135deg, #dbe7ff, #f3d9ff);
-            --gradient-dark: linear-gradient(135deg, #2e1b55, #1c0f33);
-            --glass-light: rgba(255,255,255,0.55);
-            --glass-dark: rgba(30, 30, 30, 0.55);
-            --logo-size: 80px; /* Tamanho do logo */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: "Inter", sans-serif;
-            transition: background 0.5s ease, color 0.4s ease;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
         }
 
-        body.light {
-            background: var(--gradient-light);
-            color: #333;
-        }
-
-        body.dark {
-            background: var(--gradient-dark);
-            color: #e5e5e5;
-        }
-
-        /* Canvas */
-        #particles {
+        .background {
             position: fixed;
-            inset: 0;
-            z-index: -1;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
         }
 
-        /* Container */
-        .container {
-            position: relative;
-            z-index: 5;
-            max-width: 800px;
-            margin: 0 auto;
-            margin-top: 50px;
-            padding: 45px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
-            text-align: center;
-            backdrop-filter: blur(12px);
-            animation: fadeUp 0.9s ease forwards;
-        }
-
-        body.light .container { background: var(--glass-light); }
-        body.dark .container { background: var(--glass-dark); }
-
-        @keyframes fadeUp {
-            from { transform: translateY(40px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Logo */
-        .logo {
-            width: var(--logo-size);
-            height: var(--logo-size);
-            margin: -20px auto 15px; /* Ajuste para centralizar acima do conteúdo */
-            background-image: url('https://i.imgur.com/uoWlYN7.jpeg');
-            background-size: cover;
-            background-position: center;
+        .gradient-orb {
+            position: absolute;
             border-radius: 50%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 20s ease-in-out infinite;
         }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 5px;
-            color: var(--primary);
+        .orb1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #667eea 0%, transparent 70%);
+            top: -10%;
+            right: -10%;
+            animation-delay: 0s;
         }
 
-        p { font-size: 1.2rem; }
+        .orb2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #f093fb 0%, transparent 70%);
+            bottom: -10%;
+            left: -10%;
+            animation-delay: 5s;
+        }
 
-        /* Preview Cici */
-        .preview-card {
-            margin-top: 35px;
-            padding: 25px;
-            border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            animation: float 4s ease-in-out infinite;
+        .orb3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #764ba2 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 10s;
         }
 
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-14px); }
-            100% { transform: translateY(0px); }
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
         }
 
-        body.light .preview-card { background: #f8f2ff; border: 2px solid #d5c3ff; }
-        body.dark .preview-card { background: #2b1c40; border: 2px solid #3d285a; }
-
-        .preview-image {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            margin: 15px auto 20px;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
         }
 
-        .notify-btn {
-            margin-top: 25px;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 12px;
+        .logo-container {
+            margin-bottom: 2rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 30px rgba(102, 126, 234, 0.6));
+        }
+
+        .brand-name {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #f093fb 50%, #667eea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-tagline {
             font-size: 1rem;
-            font-weight: 600; /* Mais destaque para o botão */
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            font-weight: 300;
+        }
+
+        .hero-section {
+            text-align: center;
+            max-width: 700px;
+            margin-bottom: 4rem;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-title strong {
+            font-weight: 700;
+            background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            opacity: 0.7;
+            font-weight: 300;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+            width: 100%;
+            max-width: 900px;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(240, 147, 251, 0.3);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-text {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            animation: fadeIn 1s ease-out 0.9s both;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
-            cursor: pointer;
-            background: var(--primary);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 20px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
         }
 
-        .notify-btn:hover {
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 22px rgba(0,0,0,0.3);
-        }
-        
-        /* Ocultar o loader, já que a ação é um redirecionamento */
-        .loader {
-            display: none; 
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.6);
         }
 
-        footer {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            opacity: 0.75;
+        .play-icon {
+            width: 28px;
+            height: 28px;
         }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 2.2rem; }
-            p { font-size: 1rem; }
-            .container { margin-top: 30px; padding: 35px 20px; }
-            .logo { margin: -10px auto 10px; }
+        .footer {
+            margin-top: 5rem;
+            text-align: center;
+            opacity: 0.5;
+            font-size: 0.9rem;
+            animation: fadeIn 1s ease-out 1.2s both;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-link {
+            color: #fff;
+            text-decoration: none;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .footer-link:hover {
+            opacity: 1;
+            color: #f093fb;
+        }
+
+        @media (max-width: 768px) {
+            .brand-name {
+                font-size: 2.5rem;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .cta-button {
+                padding: 18px 40px;
+                font-size: 1.1rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .orb1, .orb2, .orb3 {
+                width: 300px;
+                height: 300px;
+            }
         }
     </style>
 </head>
-
-<body class="light">
-
-<canvas id="particles"></canvas>
-
-<div class="container">
-    
-    <div class="logo"></div>
-
-    <h1>Cici está chegando ✨</h1>
-    <p>A futura **inteligência assistiva** da AmplaAI está quase pronta.</p>
-    <p>Feita para ser intuitiva, acolhedora e moderna — e sim, com mais personalidade do que deveria.</p>
-
-    <div class="preview-card">
-        <div class="preview-image"
-             style="background-image:url('https://i.imgur.com/uoWlYN7.jpeg');">
-        </div>
-        <p>
-            “Eu sou a Cici, e estou me preparando pra conhecer você.  
-            Falta pouco para eu estar totalmente online.”
-        </p>
+<body>
+    <div class="background">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
     </div>
 
-    <button class="notify-btn" onclick="notifyMe()">
-        Me avise quando lançar 🚀
-    </button>
+    <div class="container">
+        <div class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- Círculo externo -->
+                <circle cx="100" cy="100" r="85" fill="none" stroke="url(#aiGradient)" stroke-width="3" opacity="0.3"/>
+                
+                <!-- Anel médio -->
+                <circle cx="100" cy="100" r="70" fill="none" stroke="url(#aiGradient)" stroke-width="2" opacity="0.5"/>
+                
+                <!-- Forma central - representando AI -->
+                <path d="M 100 40 L 130 80 L 115 80 L 115 120 L 130 120 L 100 160 L 70 120 L 85 120 L 85 80 L 70 80 Z" 
+                      fill="url(#aiGradient)" opacity="0.9"/>
+                
+                <!-- Pontos orbitais -->
+                <circle cx="100" cy="30" r="6" fill="#667eea">
+                    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="170" cy="100" r="6" fill="#764ba2">
+                    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="100" cy="170" r="6" fill="#f093fb">
+                    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="30" cy="100" r="6" fill="#667eea">
+                    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+            
+            <h1 class="brand-name">Aira AI</h1>
+            <p class="brand-tagline">by AmplaAI</p>
+        </div>
 
-    <div class="loader"></div>
+        <div class="hero-section">
+            <h2 class="hero-title">
+                Conheça sua <strong>assistente de IA</strong> do futuro
+            </h2>
+            <p class="hero-description">
+                Conversas inteligentes, respostas precisas e uma experiência completamente revolucionária. 
+                Aira transforma a forma como você interage com inteligência artificial.
+            </p>
+        </div>
 
-    <footer>
-        © 2025 Cici • AmplaAI
-    </footer>
-</div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🧠</span>
+                <h3 class="feature-title">IA Avançada</h3>
+                <p class="feature-text">Tecnologia de ponta que aprende e se adapta ao seu estilo</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">⚡</span>
+                <h3 class="feature-title">Ultra Rápida</h3>
+                <p class="feature-text">Respostas instantâneas e precisas quando você mais precisa</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">🎯</span>
+                <h3 class="feature-title">Intuitiva</h3>
+                <p class="feature-text">Interface elegante e fácil de usar desde o primeiro momento</p>
+            </div>
+        </div>
 
-<script>
-/* ============================
-   MODO DARK AUTOMÁTICO
-=========================== */
-function aplicarTema() {
-    // Aplica o tema Dark entre 19h (7pm) e 6h (6am)
-    const horas = new Date().getHours();
-    document.body.className = (horas >= 19 || horas <= 6) ? "dark" : "light";
-}
-aplicarTema();
+        <div class="cta-section">
+            <a href="https://play.google.com/store" class="cta-button" target="_blank">
+                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                </svg>
+                Baixar na Play Store
+            </a>
+        </div>
 
-/* ============================
-   BOTÃO DE NOTIFICAÇÃO (Conectado ao Google Forms)
-=========================== */
-function notifyMe() {
-    const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfZ0Lbr_xsrus2DAKYTOHf_zn3DHKwx8Fwtv-89Q55ivZqzqA/viewform?usp=pp_url";
-    
-    // Abre o formulário em uma nova aba
-    window.open(googleFormUrl, '_blank');
-}
-
-/* ============================
-   PARTÍCULAS
-=========================== */
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
-
-let particlesArray = [];
-const total = 75;
-
-// Garante que o canvas se ajusta ao tamanho da janela
-function resizeCanvas() {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-    init();
-}
-resizeCanvas(); // Inicializa
-
-class Particle {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.7;
-        this.speedY = (Math.random() - 0.5) * 0.7;
-        this.color = "rgba(110, 60, 200, 0.5)"; // Cor ajustada para ter transparência
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-    }
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-    }
-}
-
-function init() {
-    particlesArray = [];
-    for (let i = 0; i < total; i++) particlesArray.push(new Particle());
-}
-
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particlesArray.forEach((p, i) => {
-        p.update();
-        p.draw();
-
-        // Linhas de conexão entre partículas próximas
-        for (let j = i; j < particlesArray.length; j++) {
-            const dx = p.x - particlesArray[j].x;
-            const dy = p.y - particlesArray[j].y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 130) {
-                ctx.beginPath();
-                ctx.strokeStyle = "rgba(110,60,200,0.15)";
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-                ctx.stroke();
-            }
-        }
-    });
-
-    requestAnimationFrame(animate);
-}
-
-window.onresize = resizeCanvas; // Chama resizeCanvas na mudança de tamanho da janela
-
-init();
-animate();
-</script>
-
+        <div class="footer">
+            <div class="footer-links">
+                <a href="https://termos.orpheostudio.com.br" class="footer-link" target="_blank">Termos de Uso</a>
+                <a href="https://politicas.orpheostudio.com.br" class="footer-link" target="_blank">Política de Privacidade</a>
+            </div>
+            <p>© 2024 AmplaAI. Todos os direitos reservados.</p>
+        </div>
+    </div>
 </body>
 </html>
