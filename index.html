@@ -3,442 +3,1188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aira AI by AmplaAI</title>
+    <meta name="description" content="Sion.ai — Aprenda. Entenda. Evolua.">
+    <meta name="theme-color" content="#6a5af9">
+    <meta name="robots" content="index, follow">
+
+    <!-- LGPD / Privacy -->
+    <meta name="privacy-policy" content="https://politicas.cici.net.br">
+
+    <title>Sion.ai - Aprenda. Entenda. Evolua.</title>
+
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://i.imgur.com/qpeNAU8.png">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/qpeNAU8.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sion AI">
+
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://clarity.microsoft.com/clarity.js";
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window,document,"clarity","script","tlya8thx8r");
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-REPLACE_WITH_YOUR_PUBLISHER_ID" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * {
+        /* ============================================================
+           RESET & VARIABLES
+        ============================================================ */
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary:    #6a5af9;
+            --secondary:  #d66efd;
+            --accent:     #ff8e6e;
+            --dark:       #1a1a2e;
+            --darker:     #0f0c29;
+            --light:      #f8f9fa;
+            --gray:       #6c757d;
+            --card-bg:    rgba(26, 26, 46, 0.75);
+            --card-border:rgba(255,255,255,0.08);
+            --input-bg:   rgba(0,0,0,0.30);
+            --radius:     18px;
+            --font-head:  'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0f;
+            font-family: var(--font-head);
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-attachment: fixed;
+            color: var(--light);
             min-height: 100vh;
-            color: #fff;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .background {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 0;
-        }
-
-        .gradient-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.5;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        .orb1 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, #667eea 0%, transparent 70%);
-            top: -10%;
-            right: -10%;
-            animation-delay: 0s;
-        }
-
-        .orb2 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, #f093fb 0%, transparent 70%);
-            bottom: -10%;
-            left: -10%;
-            animation-delay: 5s;
-        }
-
-        .orb3 {
-            width: 350px;
-            height: 350px;
-            background: radial-gradient(circle, #764ba2 0%, transparent 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: 10s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-30px, 30px) scale(0.9); }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* ============================================================
+           SCREEN SYSTEM — only one screen visible at a time
+        ============================================================ */
+        .screen {
+            display: none;
             min-height: 100vh;
-            justify-content: center;
+            flex-direction: column;
+            animation: screenIn 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        .screen.active { display: flex; }
+
+        @keyframes screenIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .logo-container {
-            margin-bottom: 2rem;
-            animation: fadeInDown 1s ease-out;
+        /* ============================================================
+           TOP NAV BAR (shared across screens)
+        ============================================================ */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 200;
+            background: rgba(15,12,41,0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(106,90,249,0.25);
+            padding: 0.9rem 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .topbar__logo {
+            display: flex; align-items: center; gap: 0.7rem;
+            text-decoration: none;
+            flex-shrink: 0;
         }
-
-        .logo-svg {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 0 30px rgba(102, 126, 234, 0.6));
+        .topbar__logo img {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 2px solid var(--secondary);
+            box-shadow: 0 0 10px rgba(214,110,253,0.4);
+            object-fit: cover;
         }
-
-        .brand-name {
-            font-size: 3.5rem;
-            font-weight: 700;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, #fff 0%, #f093fb 50%, #667eea 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
+        .topbar__logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+            line-height: 1.1;
         }
-
-        .brand-tagline {
-            font-size: 1rem;
-            letter-spacing: 3px;
+        .topbar__logo-text span {
+            font-size: 0.65rem;
+            color: var(--accent);
             text-transform: uppercase;
-            opacity: 0.6;
-            font-weight: 300;
+            letter-spacing: 0.6px;
         }
 
-        .hero-section {
-            text-align: center;
-            max-width: 700px;
-            margin-bottom: 4rem;
-            animation: fadeIn 1s ease-out 0.3s both;
+        .topbar__nav {
+            display: flex; gap: 0.4rem;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            line-height: 1.4;
-            margin-bottom: 1.5rem;
-            letter-spacing: -1px;
-        }
-
-        .hero-title strong {
-            font-weight: 700;
-            background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-description {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            opacity: 0.7;
-            font-weight: 300;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-bottom: 4rem;
-            width: 100%;
-            max-width: 900px;
-            animation: fadeIn 1s ease-out 0.6s both;
-        }
-
-        .feature-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(240, 147, 251, 0.3);
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-        }
-
-        .feature-card:hover::before {
-            opacity: 1;
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            position: relative;
-            z-index: 1;
-        }
-
-        .feature-title {
-            font-size: 1.2rem;
+        .topbar__nav button {
+            background: transparent;
+            border: 1px solid transparent;
+            color: rgba(255,255,255,0.6);
+            padding: 0.45rem 1rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
             font-weight: 600;
-            margin-bottom: 0.8rem;
-            position: relative;
-            z-index: 1;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+        .topbar__nav button:hover {
+            color: #fff;
+            background: rgba(106,90,249,0.15);
+        }
+        .topbar__nav button.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 3px 12px rgba(106,90,249,0.35);
         }
 
-        .feature-text {
-            font-size: 0.95rem;
-            opacity: 0.7;
-            line-height: 1.6;
-            position: relative;
-            z-index: 1;
+        /* PWA install banner */
+        #pwa-banner {
+            display: none;
+            position: fixed; top: 60px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 190;
+            background: rgba(15,12,41,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(106,90,249,0.35);
+            border-radius: 14px;
+            padding: 0.8rem 1.2rem;
+            gap: 1rem;
+            align-items: center;
+            max-width: 380px; width: 90%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            animation: slideDown 0.35s ease;
+        }
+        #pwa-banner.show { display: flex; }
+        @keyframes slideDown {
+            from { opacity:0; transform: translateX(-50%) translateY(-10px); }
+            to   { opacity:1; transform: translateX(-50%) translateY(0); }
+        }
+        #pwa-banner p { font-size: 0.82rem; color: #ccc; flex:1; }
+        #pwa-banner p strong { color: var(--secondary); }
+        .pwa-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; color: #fff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; white-space: nowrap;
+            font-family: inherit;
+        }
+        .pwa-dismiss {
+            background: none; border: none;
+            color: rgba(255,255,255,0.35);
+            font-size: 1rem; cursor: pointer;
+            padding: 0.2rem;
         }
 
-        .cta-section {
+        /* ============================================================
+           ★ WELCOME SCREEN
+        ============================================================ */
+        #welcome {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem 1.2rem;
+            padding-top: 80px;
+        }
+
+        .welcome__glow {
+            position: absolute;
+            width: 420px; height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(106,90,249,0.18) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            pointer-events: none;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%,100% { transform: translate(-50%,-50%) scale(1); opacity:.6; }
+            50%     { transform: translate(-50%,-50%) scale(1.12); opacity:1; }
+        }
+
+        .welcome__avatar {
+            position: relative; z-index: 1;
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--secondary);
+            box-shadow: 0 0 40px rgba(214,110,253,0.4), 0 0 80px rgba(106,90,249,0.15);
+            animation: avatarIn 0.6s 0.1s cubic-bezier(.4,0,.2,1) both;
+        }
+        @keyframes avatarIn {
+            from { transform: scale(0.7); opacity:0; }
+            to   { transform: scale(1);   opacity:1; }
+        }
+
+        .welcome__title {
+            position: relative; z-index: 1;
+            font-size: 2.6rem;
+            font-weight: 800;
+            margin-top: 1.4rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+            animation: fadeUp 0.5s 0.25s both;
+        }
+        .welcome__sub {
+            position: relative; z-index: 1;
+            color: rgba(255,255,255,0.55);
+            font-size: 1rem;
+            margin-top: 0.45rem;
+            max-width: 380px;
+            line-height: 1.55;
+            animation: fadeUp 0.5s 0.35s both;
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(14px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        .welcome__tags {
+            position: relative; z-index: 1;
+            display: flex; flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.55rem;
+            margin-top: 1.6rem;
+            animation: fadeUp 0.5s 0.45s both;
+        }
+        .welcome__tag {
+            background: rgba(106,90,249,0.13);
+            border: 1px solid rgba(106,90,249,0.25);
+            border-radius: 50px;
+            padding: 0.38rem 1rem;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.7);
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .welcome__tag i { color: var(--accent); font-size: 0.72rem; }
+
+        .welcome__cta {
+            position: relative; z-index: 1;
+            margin-top: 2.2rem;
+            animation: fadeUp 0.5s 0.55s both;
+        }
+        .btn-cta {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            padding: 0.9rem 2.2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 6px 24px rgba(106,90,249,0.4);
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 32px rgba(106,90,249,0.5);
+        }
+        .btn-cta:active { transform: translateY(0); }
+
+        .welcome__links {
+            position: relative; z-index: 1;
+            margin-top: 2.4rem;
+            display: flex; gap: 1.4rem;
+            animation: fadeUp 0.5s 0.65s both;
+        }
+        .welcome__links a {
+            color: rgba(255,255,255,0.38);
+            font-size: 0.72rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .welcome__links a:hover { color: var(--accent); }
+
+        /* ============================================================
+           ★ ABOUT SCREEN
+        ============================================================ */
+        #about {
+            padding-top: 80px;
+        }
+
+        .about__hero {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2rem;
-            animation: fadeIn 1s ease-out 0.9s both;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            padding: 20px 50px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .cta-button:hover::before {
-            left: 100%;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.6);
-        }
-
-        .play-icon {
-            width: 28px;
-            height: 28px;
-        }
-
-        .footer {
-            margin-top: 5rem;
             text-align: center;
-            opacity: 0.5;
+            padding: 3rem 1.5rem 2rem;
+            gap: 1.2rem;
+        }
+        .about__avatar {
+            width: 110px; height: 110px;
+            border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--secondary);
+            box-shadow: 0 0 30px rgba(214,110,253,0.35);
+        }
+        .about__name {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+        }
+        .about__role {
+            color: var(--accent);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 600;
+        }
+        .about__tag {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .about__desc {
+            max-width: 560px;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.7;
             font-size: 0.9rem;
-            animation: fadeIn 1s ease-out 1.2s both;
         }
 
-        .footer-links {
-            display: flex;
-            gap: 2rem;
+        .about__skills {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px,1fr));
+            gap: 1rem;
+            padding: 0 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .about__card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 1.4rem;
+            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+        }
+        .about__card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(106,90,249,0.2);
+        }
+        .about__card-icon {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 0.7rem;
+        }
+        .about__card h3 {
+            font-size: 1rem; margin-bottom: 0.4rem;
+        }
+        .about__card p {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.55;
+        }
+
+        .about__status {
+            display: flex; align-items: center; gap: 0.5rem;
             justify-content: center;
-            margin-bottom: 1.5rem;
+            margin: 2rem 0 1rem;
         }
+        .status-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 6px #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.4; }
+        }
+        .about__status span { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
 
-        .footer-link {
-            color: #fff;
+        .about__legal {
+            max-width: 560px;
+            margin: 1.5rem auto 0;
+            padding: 0 1.5rem 2.5rem;
+            display: flex; flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+        .about__legal a {
+            color: rgba(255,255,255,0.35);
+            font-size: 0.72rem;
             text-decoration: none;
-            opacity: 0.6;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
+            display: flex; align-items: center; gap: 0.35rem;
+            transition: color 0.2s;
+        }
+        .about__legal a:hover { color: var(--accent); }
+
+        /* ============================================================
+           ★ CHAT SCREEN
+        ============================================================ */
+        #chat-screen {
+            padding-top: 62px;
         }
 
-        .footer-link:hover {
-            opacity: 1;
-            color: #f093fb;
+        .chat__wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 62px);
         }
 
-        @media (max-width: 768px) {
-            .brand-name {
-                font-size: 2.5rem;
-            }
+        /* Ad slot inside chat */
+        .ad-slot {
+            text-align: center;
+            padding: 0.4rem 0;
+            min-height: 50px;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-            .hero-title {
-                font-size: 1.8rem;
-            }
+        .chat__messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+        .chat__messages::-webkit-scrollbar { width: 5px; }
+        .chat__messages::-webkit-scrollbar-track { background: transparent; }
+        .chat__messages::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 99px;
+        }
 
-            .hero-description {
-                font-size: 1rem;
-            }
+        .msg {
+            display: flex; gap: 0.7rem;
+            animation: msgIn 0.3s cubic-bezier(.4,0,.2,1);
+            max-width: 100%;
+        }
+        @keyframes msgIn {
+            from { opacity:0; transform: translateY(8px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .msg--user { flex-direction: row-reverse; }
 
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
+        .msg__avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            align-self: flex-end;
+        }
 
-            .cta-button {
-                padding: 18px 40px;
-                font-size: 1.1rem;
-            }
+        .msg__bubble {
+            max-width: 78%;
+            padding: 0.7rem 1rem;
+            border-radius: 16px 16px 16px 4px;
+            background: rgba(106,90,249,0.15);
+            border: 1px solid rgba(106,90,249,0.22);
+            font-size: 0.85rem;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+        .msg--user .msg__bubble {
+            border-radius: 16px 16px 4px 16px;
+            background: rgba(214,110,253,0.15);
+            border-color: rgba(214,110,253,0.22);
+        }
+        .msg__bubble ul { padding-left: 1.2rem; margin: 0.3rem 0; }
+        .msg__bubble li { margin-bottom: 0.2rem; }
 
-            .footer-links {
-                flex-direction: column;
-                gap: 1rem;
-            }
+        /* typing dots */
+        .typing { display: inline-flex; gap: 4px; padding: 0.55rem 0.2rem; }
+        .typing span {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: dot 1.4s infinite ease-in-out;
+        }
+        .typing span:nth-child(2){ animation-delay:-.16s; }
+        .typing span:nth-child(3){ animation-delay:-.32s; }
+        @keyframes dot {
+            0%,80%,100% { transform:scale(0); opacity:.4; }
+            40%         { transform:scale(1); opacity:1; }
+        }
 
-            .orb1, .orb2, .orb3 {
-                width: 300px;
-                height: 300px;
-            }
+        /* Chat bottom bar */
+        .chat__bottom {
+            padding: 0.7rem 0.8rem 1rem;
+            background: rgba(15,12,41,0.7);
+            backdrop-filter: blur(10px);
+        }
+        .chat__input-row {
+            display: flex; gap: 0.5rem; align-items: center;
+        }
+        .chat__input {
+            flex: 1;
+            padding: 0.75rem 1.2rem;
+            border-radius: 50px;
+            border: 1.5px solid rgba(106,90,249,0.35);
+            background: var(--input-bg);
+            color: var(--light);
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            font-family: inherit;
+        }
+        .chat__input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px rgba(214,110,253,0.3);
+        }
+        .chat__input::placeholder { color: rgba(255,255,255,0.3); }
+
+        .chat__send {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(106,90,249,0.35);
+            flex-shrink: 0;
+        }
+        .chat__send:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(106,90,249,0.45); }
+        .chat__send:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Quick actions */
+        .chat__quick {
+            display: flex; flex-wrap: wrap; gap: 0.5rem;
+            margin-top: 0.7rem;
+            justify-content: center;
+        }
+        .chat__quick button {
+            background: rgba(255,142,110,0.12);
+            border: 1px solid rgba(255,142,110,0.25);
+            color: var(--accent);
+            padding: 0.38rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .chat__quick button:hover {
+            background: rgba(255,142,110,0.22);
+            transform: translateY(-1px);
+        }
+
+        /* ============================================================
+           LIMIT POP-UP (modal)
+        ============================================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+            animation: overlayIn 0.2s;
+        }
+        .modal-overlay.show { display: flex; }
+        @keyframes overlayIn { from{opacity:0} to{opacity:1} }
+
+        .modal {
+            background: linear-gradient(145deg, #1e1b3a, #2a2555);
+            border: 1px solid rgba(106,90,249,0.3);
+            border-radius: 22px;
+            padding: 2.2rem 1.8rem;
+            max-width: 360px;
+            width: 90%;
+            text-align: center;
+            animation: modalIn 0.3s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        }
+        @keyframes modalIn {
+            from { opacity:0; transform: scale(.88) translateY(20px); }
+            to   { opacity:1; transform: scale(1)  translateY(0); }
+        }
+        .modal__icon {
+            font-size: 3rem;
+            margin-bottom: 0.8rem;
+        }
+        .modal h2 {
+            font-size: 1.35rem;
+            margin-bottom: 0.6rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+        }
+        .modal p {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.82rem;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+        }
+        .modal__close {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff; border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.78rem; font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+        }
+        .modal__close:hover { transform: scale(1.05); }
+
+        /* ============================================================
+           COOKIE BANNER (LGPD)
+        ============================================================ */
+        #cookie-banner {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            z-index: 400;
+            background: rgba(15,12,41,0.93);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(106,90,249,0.25);
+            padding: 1rem 1.4rem;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #cookie-banner.show { display: flex; }
+        #cookie-banner p {
+            flex: 1;
+            min-width: 200px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+        #cookie-banner p a { color: var(--accent); text-decoration: none; }
+        .cookie-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; color: #fff;
+            padding: 0.42rem 1rem;
+            border-radius: 50px;
+            font-size: 0.73rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .cookie-btn--outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.55);
+        }
+
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
+        @media (max-width: 480px) {
+            .topbar { padding: 0.7rem 1rem; }
+            .topbar__logo-text h1 { font-size: 1.1rem; }
+            .topbar__nav button { padding: 0.35rem 0.7rem; font-size: 0.76rem; }
+            .welcome__title { font-size: 2rem; }
+            .welcome__avatar { width: 110px; height: 110px; }
+            .about__skills { grid-template-columns: 1fr; padding: 0 1rem; }
+            .chat__messages { padding: 0.8rem 0.6rem 0.4rem; }
+            .btn-cta { padding: 0.8rem 1.6rem; font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
-    <div class="background">
-        <div class="gradient-orb orb1"></div>
-        <div class="gradient-orb orb2"></div>
-        <div class="gradient-orb orb3"></div>
+
+<!-- ========================================================
+     TOP BAR
+======================================================== -->
+<header class="topbar">
+    <a href="#" class="topbar__logo" onclick="navigate('welcome')">
+        <img src="https://i.imgur.com/qpeNAU8.png" alt="Sion">
+        <div class="topbar__logo-text">
+            <h1>Sion AI</h1>
+            <span>Assistente Especializada</span>
+        </div>
+    </a>
+    <nav class="topbar__nav">
+        <button class="active" data-screen="welcome" onclick="navigate('welcome')">Início</button>
+        <button data-screen="about"   onclick="navigate('about')">Sobre</button>
+        <button data-screen="chat-screen" onclick="navigate('chat-screen')">Chat</button>
+    </nav>
+</header>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+    <p>Adicione a <strong>Sion AI</strong> à sua tela de início para uma experiência completa!</p>
+    <button class="pwa-btn" id="pwa-install-btn">Instalar</button>
+    <button class="pwa-dismiss" id="pwa-dismiss-btn"><i class="fas fa-times"></i></button>
+</div>
+
+<!-- ========================================================
+     SCREEN 1 — WELCOME
+======================================================== -->
+<section id="welcome" class="screen active">
+    <div class="welcome__glow"></div>
+    <img src="https://i.imgur.com/qpeNAU8.png" alt="Sion" class="welcome__avatar">
+
+    <h1 class="welcome__title">Olá, sou a Sion!</h1>
+    <p class="welcome__sub">Sua assistente especializada em programação, animes e idiomas — aqui para ajudar com energia e simpatia.</p>
+
+    <div class="welcome__tags">
+        <span class="welcome__tag"><i class="fas fa-code"></i> Programação</span>
+        <span class="welcome__tag"><i class="fas fa-tv"></i> Animes</span>
+        <span class="welcome__tag"><i class="fas fa-language"></i> Idiomas</span>
+        <span class="welcome__tag"><i class="fas fa-brain"></i> Calma & Paciência</span>
     </div>
 
-    <div class="container">
-        <div class="logo-container">
-            <svg class="logo-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                
-                <!-- Círculo externo -->
-                <circle cx="100" cy="100" r="85" fill="none" stroke="url(#aiGradient)" stroke-width="3" opacity="0.3"/>
-                
-                <!-- Anel médio -->
-                <circle cx="100" cy="100" r="70" fill="none" stroke="url(#aiGradient)" stroke-width="2" opacity="0.5"/>
-                
-                <!-- Forma central - representando AI -->
-                <path d="M 100 40 L 130 80 L 115 80 L 115 120 L 130 120 L 100 160 L 70 120 L 85 120 L 85 80 L 70 80 Z" 
-                      fill="url(#aiGradient)" opacity="0.9"/>
-                
-                <!-- Pontos orbitais -->
-                <circle cx="100" cy="30" r="6" fill="#667eea">
-                    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="170" cy="100" r="6" fill="#764ba2">
-                    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="100" cy="170" r="6" fill="#f093fb">
-                    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="30" cy="100" r="6" fill="#667eea">
-                    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
-                </circle>
-            </svg>
-            
-            <h1 class="brand-name">Aira AI</h1>
-            <p class="brand-tagline">by AmplaAI</p>
-        </div>
+    <div class="welcome__cta">
+        <button class="btn-cta" onclick="navigate('chat-screen')">
+            <i class="fas fa-comments"></i> Começar a conversar
+        </button>
+    </div>
 
-        <div class="hero-section">
-            <h2 class="hero-title">
-                Conheça sua <strong>assistente de IA</strong> do futuro
-            </h2>
-            <p class="hero-description">
-                Conversas inteligentes, respostas precisas e uma experiência completamente revolucionária. 
-                Aira transforma a forma como você interage com inteligência artificial.
-            </p>
-        </div>
+    <div class="welcome__links">
+        <a href="#" onclick="navigate('about')">Sobre a Sion</a>
+        <span style="color:rgba(255,255,255,0.15)">/</span>
+        <a href="https://politicas.cici.net.br" target="_blank">Política de Privacidade</a>
+    </div>
+</section>
 
-        <div class="features-grid">
-            <div class="feature-card">
-                <span class="feature-icon">🧠</span>
-                <h3 class="feature-title">IA Avançada</h3>
-                <p class="feature-text">Tecnologia de ponta que aprende e se adapta ao seu estilo</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">⚡</span>
-                <h3 class="feature-title">Ultra Rápida</h3>
-                <p class="feature-text">Respostas instantâneas e precisas quando você mais precisa</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">🎯</span>
-                <h3 class="feature-title">Intuitiva</h3>
-                <p class="feature-text">Interface elegante e fácil de usar desde o primeiro momento</p>
-            </div>
-        </div>
+<!-- ========================================================
+     SCREEN 2 — ABOUT
+======================================================== -->
+<section id="about" class="screen">
+    <div class="about__hero">
+        <img src="https://i.imgur.com/qpeNAU8.png" alt="Sion" class="about__avatar">
+        <h1 class="about__name">Sion</h1>
+        <p class="about__role">IA Especializada · Assistente Virtual</p>
+        <span class="about__tag">Personalidade: Energética</span>
+        <p class="about__desc">
+            Sou a Sion, uma assistente inteligente criada para ser seu parceira no aprendizado.
+            Especializada em programação, recomendações de animes e ensino de idiomas —
+            sempre paciente e com energia para te ajudar no que precisar.
+        </p>
+    </div>
 
-        <div class="cta-section">
-            <a href="https://play.google.com/store" class="cta-button" target="_blank">
-                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                </svg>
-                Baixar na Play Store
-            </a>
+    <div class="about__skills">
+        <div class="about__card">
+            <div class="about__card-icon"><i class="fas fa-code"></i></div>
+            <h3>Programação</h3>
+            <p>Ajuda com JavaScript, Python, HTML/CSS, frameworks, resolução de bugs e projetos pessoais.</p>
         </div>
-
-        <div class="footer">
-            <div class="footer-links">
-                <a href="https://termos.orpheostudio.com.br" class="footer-link" target="_blank">Termos de Uso</a>
-                <a href="https://politicas.orpheostudio.com.br" class="footer-link" target="_blank">Política de Privacidade</a>
-            </div>
-            <p>© 2024 AmplaAI. Todos os direitos reservados.</p>
+        <div class="about__card">
+            <div class="about__card-icon"><i class="fas fa-tv"></i></div>
+            <h3>Recomendação de Animes</h3>
+            <p>Recomendações personalizadas por gênero, clássicos, lançamentos e análises detalhadas.</p>
+        </div>
+        <div class="about__card">
+            <div class="about__card-icon"><i class="fas fa-language"></i></div>
+            <h3>Ensino de Idiomas</h3>
+            <p>Aulas de inglês, japonês, espanhol e mais. Pronúncia, gramática e conversação.</p>
+        </div>
+        <div class="about__card">
+            <div class="about__card-icon"><i class="fas fa-brain"></i></div>
+            <h3>Tom Calmo & Compreensivo</h3>
+            <p>Sempre paciente para tirar suas dúvidas, não importa o nível de experiência.</p>
         </div>
     </div>
+
+    <div class="about__status">
+        <div class="status-dot"></div>
+        <span>Conectada à Mistral AI</span>
+    </div>
+
+    <div class="about__legal">
+        <a href="https://termos.cici.net.br" target="_blank"><i class="fas fa-file-contract"></i> Termos de Uso</a>
+        <a href="https://politicas.cici.net.br" target="_blank"><i class="fas fa-shield-alt"></i> Política de Privacidade</a>
+        <a href="https://eula.cici.net.br" target="_blank"><i class="fas fa-user-check"></i> EULA</a>
+    </div>
+</section>
+
+<!-- ========================================================
+     SCREEN 3 — CHAT
+======================================================== -->
+<section id="chat-screen" class="screen">
+    <div class="chat__wrapper">
+        <!-- Ad slot top -->
+        <div class="ad-slot">
+            <ins class="adsbygoogle" style="display:block; width:100%; height:50px;"
+                 data-ad-client="ca-pub-REPLACE_WITH_YOUR_PUBLISHER_ID"
+                 data-ad-slot="REPLACE_WITH_YOUR_AD_SLOT"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+
+        <div class="chat__messages" id="chatMessages">
+            <!-- Initial greeting injected by JS -->
+        </div>
+
+        <div class="chat__bottom">
+            <div class="chat__input-row">
+                <input type="text" class="chat__input" id="chatInput" placeholder="Digite sua mensagem…" autocomplete="off">
+                <button class="chat__send" id="sendButton"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <div class="chat__quick">
+                <button onclick="askQuestion('Como aprender JavaScript?')"><i class="fas fa-code"></i> JavaScript</button>
+                <button onclick="askQuestion('Recomende um anime de aventura')"><i class="fas fa-tv"></i> Anime</button>
+                <button onclick="askQuestion('Como dizer olá em japonês?')"><i class="fas fa-language"></i> Japonês</button>
+                <button onclick="askQuestion('O que é React?')"><i class="fab fa-react"></i> React</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================================
+     LIMIT MODAL
+======================================================== -->
+<div class="modal-overlay" id="limitModal">
+    <div class="modal">
+        <div class="modal__icon">🌙</div>
+        <h2>O Sion precisa de uma pausa.</h2>
+        <p>
+            Você atingiu o limite de uso diário.
+            O Sion retorna amanhã com energia renovada para continuar te ajudando!<br><br>
+            <em>Limite atualiza à meia-noite (horário de Brasília).</em>
+        </p>
+        <button class="modal__close" onclick="closeModal()">
+            <i class="fas fa-check"></i> Entendido
+        </button>
+    </div>
+</div>
+
+<!-- ========================================================
+     COOKIE BANNER (LGPD)
+======================================================== -->
+<div id="cookie-banner">
+    <p>
+        Usamos cookies para melhorar sua experiência e analisar o uso do site, conforme a
+        <a href="https://politicas.cici.net.br" target="_blank">Política de Privacidade</a> e em conformidade com a
+        <strong style="color:rgba(255,255,255,0.6)">Lei 13.709/2019 (LGPD)</strong>.
+        Ao continuar navegando, você consente ao uso de cookies não essenciais.
+    </p>
+    <button class="cookie-btn" id="cookie-accept">Aceitar</button>
+    <button class="cookie-btn cookie-btn--outline" id="cookie-decline">Recusar</button>
+</div>
+
+<!-- ========================================================
+     SCRIPTS
+======================================================== -->
+<script>
+// ============================================================
+// 1. NAVIGATION
+// ============================================================
+function navigate(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    document.querySelectorAll('.topbar__nav button').forEach(b => {
+        b.classList.toggle('active', b.dataset.screen === screenId);
+    });
+    // Init chat greeting once
+    if (screenId === 'chat-screen' && !chatInitialized) initChat();
+    window.scrollTo(0, 0);
+}
+
+// ============================================================
+// 2. PWA SERVICE WORKER & INSTALL
+// ============================================================
+let deferredInstallPrompt = null;
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    document.getElementById('pwa-banner').classList.add('show');
+});
+
+document.getElementById('pwa-install-btn').addEventListener('click', () => {
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then(() => {
+            deferredInstallPrompt = null;
+            document.getElementById('pwa-banner').classList.remove('show');
+        });
+    }
+});
+
+document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+    document.getElementById('pwa-banner').classList.remove('show');
+});
+
+// ============================================================
+// 3. COOKIE BANNER (LGPD)
+// ============================================================
+(function initCookies() {
+    const status = localStorage.getItem('sion_cookie_consent');
+    if (!status) {
+        document.getElementById('cookie-banner').classList.add('show');
+    }
+})();
+
+document.getElementById('cookie-accept').addEventListener('click', () => {
+    localStorage.setItem('sion_cookie_consent', 'accepted');
+    document.getElementById('cookie-banner').classList.remove('show');
+    // Enable analytics (Clarity already loaded; AdSense already loaded)
+});
+
+document.getElementById('cookie-decline').addEventListener('click', () => {
+    localStorage.setItem('sion_cookie_consent', 'declined');
+    document.getElementById('cookie-banner').classList.remove('show');
+    // Optionally block non-essential scripts here
+});
+
+// ============================================================
+// 4. SUPABASE — USAGE TRACKING (20 tokens/day)
+// ============================================================
+const SUPABASE_URL = 'https://onyhbarnwvoqpwveyvhc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ueWhiYXJud3ZvcXB3dmV5dmhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTY0NDQsImV4cCI6MjA3MzE3MjQ0NH0.2zqN73ZxkqxlWLp49Kmrg1CUau0YAi7dee2EIyhodoI';
+const DAILY_LIMIT  = 20;
+
+// Generate or retrieve anonymous user ID
+function getUserId() {
+    let uid = localStorage.getItem('sion_uid');
+    if (!uid) {
+        uid = crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+        localStorage.setItem('sion_uid', uid);
+    }
+    return uid;
+}
+
+// Get today's date string in BRT (UTC-3)
+function getTodayBRT() {
+    const now = new Date();
+    const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+    return brt.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+let cachedCount = null; // local cache to avoid repeated fetches
+
+// Fetch today's token count from Supabase
+async function fetchUsageCount() {
+    try {
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/usage?user_id=eq.${getUserId()}&date=eq.${getTodayBRT()}`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        const rows = await res.json();
+        cachedCount = (rows && rows.length > 0 && rows[0].tokens) || 0;
+    } catch {
+        cachedCount = cachedCount ?? 0; // fallback to local cache
+    }
+    return cachedCount;
+}
+
+// Upsert (insert or increment) usage in Supabase
+async function incrementUsage() {
+    const uid   = getUserId();
+    const today = getTodayBRT();
+    try {
+        // Try insert first
+        const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/usage`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({ user_id: uid, date: today, tokens: 1 })
+        });
+
+        // If conflict (row exists), update by incrementing
+        if (insertRes.status === 409 || insertRes.status === 400) {
+            await fetch(
+                `${SUPABASE_URL}/rest/v1/rpc/increment_usage`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ p_user_id: uid, p_date: today })
+                }
+            );
+        }
+        cachedCount = (cachedCount ?? 0) + 1;
+    } catch {
+        // Fallback: increment local cache only
+        cachedCount = (cachedCount ?? 0) + 1;
+    }
+}
+
+// Check if user has reached the daily limit
+async function checkLimit() {
+    const count = await fetchUsageCount();
+    return count >= DAILY_LIMIT;
+}
+
+// Show the limit modal
+function showLimitModal() {
+    document.getElementById('limitModal').classList.add('show');
+}
+function closeModal() {
+    document.getElementById('limitModal').classList.remove('show');
+}
+
+// ============================================================
+// 5. CHAT ENGINE
+// ============================================================
+const API_URL = 'http://localhost:3000/api/chat';
+let isProcessing   = false;
+let chatInitialized = false;
+
+function initChat() {
+    if (chatInitialized) return;
+    chatInitialized = true;
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '';
+    addMessage(
+        `Olá! Eu sou a Sion! 😊<br><br>Como posso te ajudar hoje? Pode me perguntar sobre:<br>
+         <ul><li>Programação (JavaScript, Python, etc.)</li>
+             <li>Recomendações de animes</li>
+             <li>Aprender idiomas (inglês, japonês, etc.)</li></ul><br>
+         Estou conectada à Mistral AI para te responder com precisão!`,
+        'sion'
+    );
+}
+
+function addMessage(html, sender, isTyping = false) {
+    const container = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = 'msg' + (sender === 'user' ? ' msg--user' : '');
+
+    if (isTyping) {
+        msg.id = 'typing-msg';
+        msg.innerHTML = `
+            <img src="https://i.imgur.com/qpeNAU8.png" alt="Sion" class="msg__avatar">
+            <div class="msg__bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    } else if (sender === 'sion') {
+        msg.innerHTML = `
+            <img src="https://i.imgur.com/qpeNAU8.png" alt="Sion" class="msg__avatar">
+            <div class="msg__bubble">${html}</div>`;
+    } else {
+        msg.innerHTML = `
+            <img src="https://ui-avatars.com/api/?name=U&background=6a5af9&color=fff&size=68" alt="Usuário" class="msg__avatar">
+            <div class="msg__bubble">${escapeHtml(html)}</div>`;
+    }
+
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+    const t = document.getElementById('typing-msg');
+    if (t) t.remove();
+}
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+function formatResponse(text) {
+    let f = escapeHtml(text);
+    f = f.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    f = f.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    f = f.replace(/^- (.*?)$/gm, '<li>$1</li>');
+    f = f.replace(/(<li>[\s\S]*<\/li>)/g, '<ul>$1</ul>');
+    f = f.replace(/\n/g, '<br>');
+    return f;
+}
+
+async function sendMessage() {
+    if (isProcessing) return;
+
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    // --- CHECK DAILY LIMIT ---
+    const limitReached = await checkLimit();
+    if (limitReached) { showLimitModal(); return; }
+
+    // UI update
+    addMessage(message, 'user');
+    input.value = '';
+    addMessage('', 'sion', true);
+
+    isProcessing = true;
+    document.getElementById('sendButton').disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                context: "Você é Sion, uma IA especialista em programação, recomendação de animes e ensino de idiomas. Seu tom é calmo, simpático e compreensível, mas com personalidade energética. Responda em português brasileiro."
+            })
+        });
+
+        if (!response.ok) throw new Error(`Erro ${response.status}`);
+
+        const data = await response.json();
+        removeTyping();
+
+        if (data.response) {
+            addMessage(formatResponse(data.response), 'sion');
+            // --- INCREMENT USAGE AFTER SUCCESSFUL RESPONSE ---
+            await incrementUsage();
+        } else {
+            addMessage('Desculpe, não consegui processar sua mensagem. Poderia tentar novamente?', 'sion');
+        }
+    } catch (err) {
+        console.error(err);
+        removeTyping();
+        addMessage('Ops! Estou com dificuldades para conectar ao servidor. Tente novamente mais tarde. 😊', 'sion');
+    } finally {
+        isProcessing = false;
+        document.getElementById('sendButton').disabled = false;
+        input.focus();
+    }
+}
+
+function askQuestion(q) {
+    document.getElementById('chatInput').value = q;
+    sendMessage();
+}
+
+// ============================================================
+// 6. EVENT LISTENERS
+// ============================================================
+document.getElementById('sendButton').addEventListener('click', sendMessage);
+document.getElementById('chatInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// AdSense push (runs once DOM is ready)
+window.addEventListener('DOMContentLoaded', () => {
+    try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+});
+</script>
 </body>
 </html>
